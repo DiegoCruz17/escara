@@ -16,6 +16,7 @@ pip install -r requirements.txt
 1. Desplegar la intefaz:
 ```
 cd frontend
+npm install
 npm run dev
 ```
 2. Conectar al arduino
