@@ -7,21 +7,21 @@ const ConfiguratorContext = createContext();
 
 // Create a provider component
 export function ConfiguratorProvider({ children }) {
-    const [base, setBase] = useState(0);
+    const [base, setBase] = useState(-90);
     const [segmento1, setSegmento1] = useState(0);
-    const [zAxis, setZAxis] = useState(0);
+    const [zAxis, setZAxis] = useState(100);
     const [segmento2, setSegmento2] = useState(0);
     const [gripper, setGripper] = useState(0);
     const [baseMin, setBaseMin] = useState(-180);
     const [baseMax, setBaseMax] = useState(180);
-    const [zMin, setZMin] = useState(15);
+    const [zMin, setZMin] = useState(50);
     const [zMax, setZMax] = useState(230);
-    const [segmento1Min, setSegmento1Min] = useState(0);
-    const [segmento1Max, setSegmento1Max] = useState(100);
-    const [segmento2Min, setSegmento2Min] = useState(0);
-    const [segmento2Max, setSegmento2Max] = useState(100);
+    const [segmento1Min, setSegmento1Min] = useState(-180);
+    const [segmento1Max, setSegmento1Max] = useState(180);
+    const [segmento2Min, setSegmento2Min] = useState(-180);
+    const [segmento2Max, setSegmento2Max] = useState(180);
     const [gripperMin, setGripperMin] = useState(0);
-    const [gripperMax, setGripperMax] = useState(100);
+    const [gripperMax, setGripperMax] = useState(90);
     const [matrix, setMatrix] = useState([
         [0, 0, 0, 0],
         [0, 0, 0, 0],

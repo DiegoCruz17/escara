@@ -12,9 +12,9 @@ const ScaraRobotControl = () => {
   const [limitsEnabled5, setLimitsEnabled5] = useState(false);
 
   const resetToDefaults = () => {
-    attrs.setBase(0);
+    attrs.setBase(-90);
     attrs.setSegmento1(0);
-    attrs.setZAxis(0);
+    attrs.setZAxis(100);
     attrs.setSegmento2(0);
     attrs.setGripper(0);
     attrs.setBaseMin(-180);
@@ -130,7 +130,7 @@ const ScaraRobotControl = () => {
             max={attrs.gripperMax}
             setMin={attrs.setGripperMin}
             setMax={attrs.setGripperMax}
-            unit="mm"
+            unit="°"
             limitsEnabled={limitsEnabled4}
             setLimitsEnabled={setLimitsEnabled4}
           />

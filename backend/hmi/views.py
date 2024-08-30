@@ -3,7 +3,7 @@ from django.views.decorators.csrf import csrf_exempt
 import json,math,serial,time
 import numpy as np
 
-DEV = True
+DEV = False
 if not DEV:
     ser = serial.Serial(
         port='COM7',  # Replace with your serial port
