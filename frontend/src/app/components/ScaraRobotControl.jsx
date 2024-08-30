@@ -19,14 +19,14 @@ const ScaraRobotControl = () => {
     attrs.setGripper(0);
     attrs.setBaseMin(-180);
     attrs.setBaseMax(180);
-    attrs.setZMin(15);
+    attrs.setZMin(100);
     attrs.setZMax(230);
-    attrs.setSegmento1Min(0);
-    attrs.setSegmento1Max(100);
-    attrs.setSegmento2Min(0);
-    attrs.setSegmento2Max(100);
+    attrs.setSegmento1Min(-150);
+    attrs.setSegmento1Max(150);
+    attrs.setSegmento2Min(-150);
+    attrs.setSegmento2Max(150);
     attrs.setGripperMin(0);
-    attrs.setGripperMax(100);
+    attrs.setGripperMax(90);
 
     setLimitsEnabled1(false);
     setLimitsEnabled2(false);
