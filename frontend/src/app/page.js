@@ -11,9 +11,14 @@ export default function Home() {
           />
         <h3 className="font-bold mt-[8px] text-[24px] text-black text-center">Controlador SCARA</h3>
       </div>
-      <div className="flex flex-row gap-[64px] min-w-[80%] mt-[16px] justify-center align-center mb-[32px]">
-        <ScaraRobotControl/>
-        <ScaraSimulation/>
+      {/* <div className="grid grid-cols-5 min-w-[80%] mt-[16px] justify-center align-center mb-[32px]"> */}
+      <div className="flex flex-row gap-[64px] min-w-[80%] w-[80%] mt-[16px] justify-center align-center mb-[32px]">
+        <div className="relative flex flex-grow">
+          <ScaraRobotControl/>
+        </div>
+        <div className="relative">
+          <ScaraSimulation/>
+        </div>
       </div>
     </main>
   );

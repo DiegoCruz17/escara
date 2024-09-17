@@ -7,11 +7,15 @@ const ConfiguratorContext = createContext();
 
 // Create a provider component
 export function ConfiguratorProvider({ children }) {
-    const [base, setBase] = useState(-90);
+    const [mode, setMode] = useState("geometrico");
+    const [x, setX] = useState(18);
+    const [y, setY] = useState(0);
+    const [z, setZ] = useState(0);
+    const [base, setBase] = useState(0);
     const [segmento1, setSegmento1] = useState(0);
-    const [zAxis, setZAxis] = useState(100);
-    const [segmento2, setSegmento2] = useState(0);
-    const [gripper, setGripper] = useState(0);
+    const [zAxis, setZAxis] = useState(230);
+    const [segmento2, setSegmento2] = useState(-45);
+    const [gripper, setGripper] = useState(90);
     const [baseMin, setBaseMin] = useState(-180);
     const [baseMax, setBaseMax] = useState(180);
     const [zMin, setZMin] = useState(100);
@@ -54,6 +58,14 @@ export function ConfiguratorProvider({ children }) {
       ]);
 
     const attrs = {
+        "x":x, 
+        "setX":setX, 
+        "y":y,
+        "setY":setY,
+        "z":z,
+        "setZ":setZ,
+        "mode":mode,
+        "setMode":setMode,
         "base":base,
         "segmento1":segmento1,
         "segmento2":segmento2,

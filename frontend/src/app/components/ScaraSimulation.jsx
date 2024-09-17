@@ -157,7 +157,7 @@ const Robot = (attrs) => {
 
     return result;
   }
-  let base = <Model key={generateRandomString(10)} url="./models/base.glb" position={[0,0,0]} scale={[SCALE,SCALE,SCALE]} name={"base"} rotation={[0, -Math.PI, 0]}/>
+  let base = <Model key={generateRandomString(10)} url="./models/base.glb" position={[0,0,0]} scale={[SCALE,SCALE,SCALE]} name={"base"} rotation={[0, 0, 0]}/>
   let eje = <Model key={generateRandomString(10)} url="./models/eje.glb" position={[0,0,0]} scale={[SCALE,SCALE,SCALE]} name={"base"} rotation={[0, attrs.base*Math.PI/180, 0]}/>
   let segmento1 = <Model key={generateRandomString(10)} url="./models/segmento1.glb" position={[0,attrs.zAxis/25,0]} scale={[SCALE,SCALE,SCALE]} name={"base"} rotation={[0, attrs.base*Math.PI/180, 0]} onLoadCallback={setDimsSegmento}/>
   let segmento2 = <Model key={generateRandomString(10)} url="./models/segmento2.glb" position={[dimsSegmento.width/30*Math.cos(attrs.base*Math.PI/180),attrs.zAxis/25,-dimsSegmento.width/30*Math.sin(attrs.base*Math.PI/180)]} scale={[SCALE,SCALE,SCALE]} name={"base"} rotation={[0, attrs.base*Math.PI/180+attrs.segmento1*Math.PI/180, 0]}/>
@@ -168,9 +168,29 @@ const Robot = (attrs) => {
     {segmento2}
   </group>)
 }
+const Bottle = (attrs) => {
+  function generateRandomString(length) {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+
+    for (let i = 0; i < length; i++) {
+        const randomIndex = Math.floor(Math.random() * characters.length);
+        result += characters.charAt(randomIndex);
+    }
+
+    return result;
+  }
+  let bottle = <Model mat_index={0} key={generateRandomString(10)} url="./models/bottle.glb" position={[0,0,0]} scale={[SCALE*0.5,SCALE*0.5,SCALE*0.5]} name={"bottle"} rotation={[0, 0, 0]}/>
+  return (<group
+  position={[attrs.x,attrs.z,attrs.y]}>
+    {bottle}
+  </group>)
+}
+
 export default function ScaraSimulation (){
   const attrs = useConfigurator();
   const robot = Robot(attrs);
+  const bottle = Bottle(attrs);
     return (
     <div className="flex flex-col gap-[12px]">
       <div>
@@ -196,6 +216,8 @@ export default function ScaraSimulation (){
           <Plane receiveShadow position={[0, -5, 0]} />
           <Glass position={[0, 15, 0]}/>
           {robot}
+          {bottle}
+
         </Canvas>
       </div>
       <div>
