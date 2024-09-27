@@ -51,9 +51,9 @@ const ScaraRobotControl = () => {
         attrs.setMatrix1(res.matrix1);
         attrs.setMatrix2(res.matrix2);
         attrs.setMatrix3(res.matrix3);
-        attrs.setMatrix4(res.matrix4);
+        attrs.setMatrix4(res.matrix4); 
       }
-      else{
+      if(res.q1a && res.q2a){
         attrs.setBase(res.q1a)
         attrs.setSegmento1(res.q2a)
       }
@@ -71,8 +71,8 @@ const ScaraRobotControl = () => {
     <div className="flex flex-col gap-0 w-[100%] relative flex-grow h-full">
       <Tabs defaultValue="forward" orientation="horizontal" className="flex flex-col w-[100%] min-w-[100%] flex-grow">
         <TabsList className="flex flex-row p-0 justify-start m-0">
-          <TabsTrigger value="forward" className="font-bold">Forward</TabsTrigger>
-          <TabsTrigger value="inverse" className="font-bold">Inverse</TabsTrigger>
+          <TabsTrigger onClick={()=>{attrs.setMode("directo")}} value="forward" className="font-bold">Forward</TabsTrigger>
+          <TabsTrigger onClick={()=>{attrs.setMode("geometrico")}} value="inverse" className="font-bold">Inverse</TabsTrigger>
         </TabsList>
         <div className="flex flex-col flex-grow h-full ">
           <div className="min-w-[100%] flex-grow max-w-[800px] bg-background p-[16px]">
@@ -180,8 +180,8 @@ const ScaraRobotControl = () => {
                 <Label htmlFor="gradiente">Gradiente</Label>
               </div>
             </RadioGroup>
-            <PositionControlGroup title={"X"} value={attrs.x} setValue={attrs.setX} min={0} max={100} unit={"mm"}/>
-            <PositionControlGroup title={"Y"} value={attrs.y} setValue={attrs.setY} min={0} max={100} unit={"mm"}/>
+            <PositionControlGroup title={"X"} value={attrs.x} setValue={attrs.setX} min={-500} max={500} unit={"mm"}/>
+            <PositionControlGroup title={"Y"} value={attrs.y} setValue={attrs.setY} min={-500} max={500} unit={"mm"}/>
             <PositionControlGroup title={"Z"} value={attrs.z} setValue={attrs.setZ} min={0} max={100} unit={"mm"}/>
               <div className="mt-8 flex justify-center space-x-4">
                 <button onClick={sendInstructions} className="bg-[#5e7029] text-white font-normal py-2 px-4 rounded-[4px]">

@@ -7,7 +7,7 @@ const ConfiguratorContext = createContext();
 
 // Create a provider component
 export function ConfiguratorProvider({ children }) {
-    const [mode, setMode] = useState("geometrico");
+    const [mode, setMode] = useState("directo");
     const [x, setX] = useState(18);
     const [y, setY] = useState(0);
     const [z, setZ] = useState(0);

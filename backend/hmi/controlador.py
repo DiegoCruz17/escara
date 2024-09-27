@@ -37,6 +37,7 @@ class Controlador:
         self.serial = self.inicializar_serial()
         self.modos = ["geometrico","algebraico","mth","newton","gradiente"]
         self.inicializar_control_inalambrico()
+        self.channel_layer = get_channel_layer()
 
     def send_scara_update(self, data):
         async_to_sync(self.channel_layer.group_send)(
@@ -46,6 +47,18 @@ class Controlador:
                 "data": data
             }
         )
+    def procesar_cinematica_inversa_geom(self,x, y, L3=228, L5=164):
+        c2 = (x**2+y**2-L3**2-L5**2)/(2*L3*L5)
+        s2a =  np.sqrt(1-c2**2)
+        s2b = -np.sqrt(1-c2**2)
+        # Solución 1:
+        q2a = (np.arctan2(s2a, c2))*180/np.pi
+        q1a = (np.arctan2(y,x) - np.arctan2(L5*s2a, L3+L5*c2))*180/np.pi
+        # Solución 2:
+        q2b = (np.arctan2(s2b, c2))*180/np.pi
+        q1b = (np.arctan2(y,x) - np.arctan2(L5*s2b, L3+L5*c2))*180/np.pi
+        # Retornar ambas soluciones
+        return q1a, q2a
 
     def  procesar_cinematica_inversa_alg(self,x, y, L3 = 228, L5 = 164):
         c2 = (x**2+y**2-L3**2-L5**2)/(2*L3*L5)
@@ -67,9 +80,9 @@ class Controlador:
         q1b = (np.arctan2(s1, c1))*180/np.pi
         return q1a,q2a
 
-    def procesar_cinematica_directa(self,data:dict):
-        mth0_1 = np.array([[math.cos(data.get('base')*math.pi/180),-math.sin(data.get('base')*math.pi/180),0,0],
-                            [math.sin(data.get('base')*math.pi/180),math.cos(data.get('base')*math.pi/180),0,0],
+    def procesar_cinematica_directa(self,base,z,segmento1,segmento2):
+        mth0_1 = np.array([[math.cos(base*math.pi/180),-math.sin(base*math.pi/180),0,0],
+                            [math.sin(base*math.pi/180),math.cos(base*math.pi/180),0,0],
                             [0,0,1,0],
                             [0,0,0,1]])@np.array([[1,0,0,0],
                                                     [0,1,0,0],
@@ -77,13 +90,13 @@ class Controlador:
                                                     [0,0,0,1]])
         mth1_2 = np.array([[1,0,0,0],
                         [0,1,0,0],
-                        [0,0,1,data.get("zAxis")],
+                        [0,0,1,z],
                         [0,0,0,1]])@np.array([[1,0,0,228],
                                             [0,1,0,0],
                                             [0,0,1,0],
                                             [0,0,0,1]])
-        mth2_3 = np.array([[math.cos(data.get('segmento1')*math.pi/180),-math.sin(data.get('segmento1')*math.pi/180),0,0],
-                        [math.sin(data.get('segmento1')*math.pi/180),math.cos(data.get('segmento1')*math.pi/180),0,0],
+        mth2_3 = np.array([[math.cos(segmento1*math.pi/180),-math.sin(segmento1*math.pi/180),0,0],
+                        [math.sin(segmento1*math.pi/180),math.cos(segmento1*math.pi/180),0,0],
                         [0,0,1,0],
                         [0,0,0,1]])@np.array([[1,0,0,0],
                                             [0,1,0,0],
@@ -92,8 +105,8 @@ class Controlador:
                                                                 [0,1,0,0],
                                                                 [0,0,1,0],
                                                                 [0,0,0,1]])
-        mth3_4 = np.array([[math.cos(data.get('segmento2')*math.pi/180),-math.sin(data.get('segmento2')*math.pi/180),0,0],
-                        [math.sin(data.get('segmento2')*math.pi/180),math.cos(data.get('segmento2')*math.pi/180),0,0],
+        mth3_4 = np.array([[math.cos(segmento2*math.pi/180),-math.sin(segmento2*math.pi/180),0,0],
+                        [math.sin(segmento2*math.pi/180),math.cos(segmento2*math.pi/180),0,0],
                         [0,0,1,0],
                         [0,0,0,1]])@np.array([[1,0,0,0],
                                             [0,1,0,0],

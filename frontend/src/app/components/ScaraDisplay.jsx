@@ -17,6 +17,7 @@ function useScaraWebSocket(url){
       };
   
       ws.onmessage = (event) => {
+        console.log("WS Event", event)
         try {
           const data = JSON.parse(event.data);
           setScaraData(data);

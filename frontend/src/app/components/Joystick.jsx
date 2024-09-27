@@ -1,86 +1,112 @@
 "use client"
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { useConfigurator } from '../contexts/Configurator';
 
 const Joystick = () => {
+  const attrs = useConfigurator()
   const [position, setPosition] = useState({ x: 0, y: 0 });
-  const [activeSection, setActiveSection] = useState(null);
+  const [direction, setDirection] = useState('Origen');
   const joystickRef = useRef(null);
+  const isDraggingRef = useRef(false);
+  const handleVarChange = (variable, setter, speed) => {
+    setter(prevValue => prevValue + speed);
+  }
+  const handleMouseDown = useCallback((e) => {
+    isDraggingRef.current = true;
+    updatePosition(e);
+  }, []);
 
-  const handleMouseDown = (e) => {
+  const handleMouseMove = useCallback((e) => {
+    if (isDraggingRef.current) {
+      updatePosition(e);
+    }
+  }, []);
+
+  const handleMouseUp = useCallback(() => {
+    isDraggingRef.current = false;
+    setPosition({ x: 0, y: 0 });
+    setDirection('Center');
+  }, []);
+
+  const updatePosition = useCallback((e) => {
+    if (!joystickRef.current) return;
+
+    const rect = joystickRef.current.getBoundingClientRect();
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    
+    let x = (e.clientX - rect.left - centerX) / centerX;
+    let y = (e.clientY - rect.top - centerY) / centerY;
+
+    // Clamp values to [-1, 1] range
+    x = Math.max(-1, Math.min(1, x));
+    y = Math.max(-1, Math.min(1, y));
+
+    setPosition({ x, y });
+    updateDirection(x, y);
+  }, []);
+
+  const updateDirection = useCallback((x, y) => {
+    const angle = Math.atan2(y, x) * (180 / Math.PI);
+    let direction;
+    console.log(angle)
+    if (Math.abs(x) < 0.1 && Math.abs(y) < 0.1) {
+      direction = 'Origen';
+    } else if (angle < 0 && angle >= -45) {
+      direction = '+X';
+      handleVarChange(attrs.x, attrs.setX, 5)
+    } else if (angle < -45 && angle >= -90) {
+      direction = '+Y';
+      handleVarChange(attrs.y, attrs.setY, 5)
+    } else if (angle < -90 && angle >= -135) {
+      direction = '+Z';
+      handleVarChange(attrs.z, attrs.setZ, 5)
+    } else if (angle < -135 && angle >= -180) {
+      direction = '+O';
+      handleVarChange(attrs.gripper, attrs.setGripper, 5)
+    } else if (angle < 180 && angle >= 135) {
+      direction = '-X';
+      handleVarChange(attrs.x, attrs.setX, -5)
+    } else if (angle < 135 && angle >= 90) {
+      direction = '-Y';
+      handleVarChange(attrs.y, attrs.setY, -5)
+    } else if (angle < 90 && angle >= 45) {
+      direction = '-Z';
+      handleVarChange(attrs.z, attrs.setZ, -5)
+    } else if (angle < 45 && angle >= 0) {
+      direction = '-O';
+      handleVarChange(attrs.gripper, attrs.setGripper, -5)
+    }
+    setDirection(direction);
+  }, [attrs]);
+
+  useEffect(() => {
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
-  };
-
-  const handleMouseMove = (e) => {
-    if (joystickRef.current) {
-      const rect = joystickRef.current.getBoundingClientRect();
-      const centerX = rect.left + rect.width / 2;
-      const centerY = rect.top + rect.height / 2;
-
-      let x = e.clientX - centerX;
-      let y = e.clientY - centerY;
-
-      // Limit the joystick movement to the circular area
-      const radius = rect.width / 2;
-      const distance = Math.sqrt(x * x + y * y);
-      if (distance > radius) {
-        x = (x / distance) * radius;
-        y = (y / distance) * radius;
-      }
-
-      setPosition({ x, y });
-
-      // Calculate the angle and determine the active section
-      const angle = (Math.atan2(y, x) * 180) / Math.PI;
-      const section = Math.floor(((angle + 180 + 22.5) % 360) / 45);
-      setActiveSection(section);
-    }
-  };
-
-  const handleMouseUp = () => {
-    document.removeEventListener('mousemove', handleMouseMove);
-    document.removeEventListener('mouseup', handleMouseUp);
-    setPosition({ x: 0, y: 0 });
-    setActiveSection(null);
-  };
-
-  const sections = [
-    'N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'
-  ];
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [handleMouseMove, handleMouseUp]);
 
   return (
-    <div className="flex flex-col items-center justify-center bg-white mb-[20%]">
+    <div className="flex flex-col items-center justify-center h-full bg-white">
       <div 
         ref={joystickRef}
         className="relative w-64 h-64 bg-gray-300 rounded-full cursor-pointer"
         onMouseDown={handleMouseDown}
       >
-        {sections.map((section, index) => (
-          <div
-            key={section}
-            className={`absolute w-full h-full flex items-center justify-center text-lg font-bold ${
-              activeSection === index ? 'text-red-500' : 'text-gray-600'
-            }`}
-            style={{
-              transform: `rotate(${index * 45}deg)`,
-              clipPath: 'polygon(50% 50%, 50% 0, 100% 0, 100% 50%)',
-            }}
-          >
-            {section}
-          </div>
-        ))}
-        <div
-          className="absolute w-16 h-16 bg-blue-500 rounded-full"
+        <div 
+          className="absolute w-16 h-16 bg-blue-500 rounded-full transition-transform duration-75 ease-out"
           style={{
-            transform: `translate(${position.x}px, ${position.y}px)`,
-            transition: 'transform 0.1s',
+            transform: `translate(${position.x * 96}px, ${position.y * 96}px)`,
             top: 'calc(50% - 2rem)',
             left: 'calc(50% - 2rem)',
           }}
         />
       </div>
       <div className="mt-4 text-xl font-bold">
-        Active Section: {activeSection !== null ? sections[activeSection] : 'None'}
+        Direction: {direction}
       </div>
     </div>
   );
