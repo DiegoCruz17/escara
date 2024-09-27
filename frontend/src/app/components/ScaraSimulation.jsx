@@ -7,44 +7,6 @@ import { useConfigurator } from '../contexts/Configurator';
 
 const SCALE = 1/20
 
-const MTH = ({matrices}) => {
-  const [viewIndex,setViewIndex] = useState(0);
-  
-  return (
-
-      <div className="flex flex-col text-black items-center mx-2">
-        <div className="flex flex-row gap-2 mb-4">
-          <button className="bg-[#5e2129] p-[6px] text-white font-normal text-[12px]" onClick={()=>{setViewIndex(1)}}>MTH1_2</button>
-          <button className="bg-[#5e2129] p-[6px] text-white font-normal text-[12px]" onClick={()=>{setViewIndex(2)}}>MTH2_3</button>
-          <button className="bg-[#5e2129] p-[6px] text-white font-normal text-[12px]" onClick={()=>{setViewIndex(3)}}>MTH3_4</button>
-          <button className="bg-[#5e2129] p-[6px] text-white font-normal text-[12px]" onClick={()=>{setViewIndex(4)}}>MTH4_5</button>
-          <button className="bg-[#5e2129] p-[6px] text-white font-normal text-[12px]" onClick={()=>{setViewIndex(0)}}>MTH Final</button>
-        </div>
-        <h2 className="text-[14px] mb-2 text-black">{viewIndex == 0?"MTH Total":"MTH" + (viewIndex)+"_"+(viewIndex+1)}</h2>
-        <div className="border-l-2 border-r-2 border-black">
-          <table className="border-collapse">
-            <tbody>
-              {matrices[viewIndex].map((row, rowIndex) => (
-                <tr key={rowIndex}>
-                  {row.map((cell, colIndex) => (
-                    <td
-                      key={`${rowIndex}-${colIndex}`}
-                      className="w-12 h-12 text-center font-mono text-lg"
-                    >
-                      {cell}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    
-  
-  );
-  };
-
 const Model = ({ url, position, name=null, rotation, onLoadCallback, scale,mat_index=11}) => {
 
   const { scene } = useGLTF(url);
@@ -192,11 +154,11 @@ export default function ScaraSimulation (){
   const robot = Robot(attrs);
   const bottle = Bottle(attrs);
     return (
-    <div className="flex flex-col gap-[12px]">
+    <div className="flex flex-col gap-[12px] w-full">
       <div>
         <Canvas
             size={[`600px`,`400px`]}
-            style={{width: `600px`, height: `350px`}}
+            style={{width: `100%`, height: `350px`}}
             shadows={true} className="min-w-[600px] h-[100%] min-h-[400px] border-[2px] border-solid border-[#80808080]"
             // orthographic
             camera={{ position: [25, 35, 25] }}
@@ -219,9 +181,6 @@ export default function ScaraSimulation (){
           {bottle}
 
         </Canvas>
-      </div>
-      <div>
-        <MTH matrices={[attrs.matrix,attrs.matrix1,attrs.matrix2,attrs.matrix3,attrs.matrix4]}/>
       </div>
     </div>
 

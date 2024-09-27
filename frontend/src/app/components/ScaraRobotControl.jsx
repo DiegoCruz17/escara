@@ -8,11 +8,7 @@ import { RadioGroup, RadioGroupItem } from "@/app/components/ui/radio-group"
 
 const ScaraRobotControl = () => {
   const attrs = useConfigurator();
-  const [limitsEnabled1, setLimitsEnabled1] = useState(false);
-  const [limitsEnabled2, setLimitsEnabled2] = useState(false);
-  const [limitsEnabled3, setLimitsEnabled3] = useState(false);
-  const [limitsEnabled4, setLimitsEnabled4] = useState(false);
-  const [limitsEnabled5, setLimitsEnabled5] = useState(false);
+  const [limitsEnabled, setLimitsEnabled] = useState(false);
 
   const resetToDefaults = () => {
     attrs.setBase(0);
@@ -31,11 +27,7 @@ const ScaraRobotControl = () => {
     attrs.setGripperMin(0);
     attrs.setGripperMax(90);
 
-    setLimitsEnabled1(false);
-    setLimitsEnabled2(false);
-    setLimitsEnabled3(false);
-    setLimitsEnabled4(false);
-    setLimitsEnabled5(false);
+    setLimitsEnabled(false);
   };
   // useEffect(()=>{
   const sendInstructions = async () => {
@@ -64,21 +56,28 @@ const ScaraRobotControl = () => {
     }
   };
 
-  //   sendInstructions();
-
-  // },[attrs.base, attrs.segmento1, attrs.segmento2, attrs.zAxis])
+  
 
   return (
-    <div className="flex flex-row gap-0 w-[100%] relative">
-      <Tabs defaultValue="forward" orientation="vertical" className="flex w-[100%] min-w-[100%]">
-        <TabsList className="flex flex-col h-full bg-gray-100 p-0 justify-start">
-          <TabsTrigger value="forward" className="font-bold rotate-180 [writing-mode:vertical-lr]">Forward</TabsTrigger>
-          <TabsTrigger value="inverse" className="font-bold rotate-180 [writing-mode:vertical-lr]">Inverse</TabsTrigger>
+    <div className="flex flex-col gap-0 w-[100%] relative flex-grow h-full">
+      <Tabs defaultValue="forward" orientation="horizontal" className="flex flex-col w-[100%] min-w-[100%] flex-grow">
+        <TabsList className="flex flex-row p-0 justify-start m-0">
+          <TabsTrigger value="forward" className="font-bold">Forward</TabsTrigger>
+          <TabsTrigger value="inverse" className="font-bold">Inverse</TabsTrigger>
         </TabsList>
-        <div className="flex flex-col flex-grow">
-          <div className="min-w-[100%] flex-grow max-w-[800px] bg-white p-[16px]">
+        <div className="flex flex-col flex-grow h-full ">
+          <div className="min-w-[100%] flex-grow max-w-[800px] bg-background p-[16px]">
           <TabsContent value="forward">
+            <div className='flex flex-row justify-end gap-2'>
+              <input 
+              type="checkbox" 
+              checked={limitsEnabled}
+              onChange={() => setLimitsEnabled(!limitsEnabled)}
+            />
+            <span>Habilitar Límites</span>
+            </div>
             <ControlGroup
+            limitsEnabled={limitsEnabled}
             title="Base"
             value={attrs.base}
             setValue={attrs.setBase}
@@ -87,11 +86,10 @@ const ScaraRobotControl = () => {
             setMin={attrs.setBaseMin}
             setMax={attrs.setBaseMax}
             unit="°"
-            limitsEnabled={limitsEnabled1}
-            setLimitsEnabled={setLimitsEnabled1}
           />
 
           <ControlGroup
+          limitsEnabled={limitsEnabled}
             title="Eje Z"
             value={attrs.zAxis}
             setValue={attrs.setZAxis}
@@ -100,11 +98,10 @@ const ScaraRobotControl = () => {
             setMin={attrs.setZMin}
             setMax={attrs.setZMax}
             unit="mm"
-            limitsEnabled={limitsEnabled2}
-            setLimitsEnabled={setLimitsEnabled2}
           />
 
           <ControlGroup
+          limitsEnabled={limitsEnabled}
             title="Segmento 1"
             value={attrs.segmento1}
             setValue={attrs.setSegmento1}
@@ -113,11 +110,10 @@ const ScaraRobotControl = () => {
             setMin={attrs.setSegmento1Min}
             setMax={attrs.setSegmento1Max}
             unit="°"
-            limitsEnabled={limitsEnabled3}
-            setLimitsEnabled={setLimitsEnabled3}
           />
 
           <ControlGroup
+          limitsEnabled={limitsEnabled}
             title="Segmento 2"
             value={attrs.segmento2}
             setValue={attrs.setSegmento2}
@@ -126,11 +122,10 @@ const ScaraRobotControl = () => {
             setMin={attrs.setSegmento2Min}
             setMax={attrs.setSegmento2Max}
             unit="°"
-            limitsEnabled={limitsEnabled5}
-            setLimitsEnabled={setLimitsEnabled5}
           />
 
           <ControlGroup
+          limitsEnabled={limitsEnabled}
             title="Gripper"
             value={attrs.gripper}
             setValue={attrs.setGripper}
@@ -139,8 +134,6 @@ const ScaraRobotControl = () => {
             setMin={attrs.setGripperMin}
             setMax={attrs.setGripperMax}
             unit="°"
-            limitsEnabled={limitsEnabled4}
-            setLimitsEnabled={setLimitsEnabled4}
           />
               <div className="mt-8 flex justify-center space-x-4">
                 <button onClick={sendInstructions} className="bg-[#5e7029] text-white font-normal py-2 px-4 rounded-[4px]">
@@ -197,7 +190,7 @@ const ScaraRobotControl = () => {
   );
 };
 
-const ControlGroup = ({ title, value, setValue, min, max, unit, limitsEnabled, setLimitsEnabled, setMin, setMax }) => {
+const ControlGroup = ({ title, value, setValue, min, max, unit, limitsEnabled,setMin, setMax }) => {
 
   const handleValueChange = (newValue) => {
     const clampedValue = Math.max(min, Math.min(max, newValue));
@@ -208,14 +201,6 @@ const ControlGroup = ({ title, value, setValue, min, max, unit, limitsEnabled, s
     <div className="space-y-2 text-black mt-[8px] m-[8px]">
       <div className="flex flex-row justify-between items-center">
         <h2 className="text-xl font-semibold text-[#000]">{title}</h2>
-        <label className="flex items-center space-x-2">
-          <input 
-            type="checkbox" 
-            checked={limitsEnabled}
-            onChange={() => setLimitsEnabled(!limitsEnabled)}
-          />
-          <span>Habilitar Límites</span>
-        </label>
       </div>
       <div className="flex justify-between items-center space-x-2 text-black">
         <div className="flex items-center">
