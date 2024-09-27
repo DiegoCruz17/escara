@@ -2,6 +2,7 @@ import ScaraRobotControl from "./components/ScaraRobotControl";
 import ScaraSimulation from "./components/ScaraSimulation";
 import MTH from "./components/MTH";
 import Joystick from "./components/Joystick";
+import ScaraDisplay from "./components/ScaraDisplay";
 export default function Home() {
   return (
     <main className="grid grid-cols-12 bg-gray-100 min-h-lvh">
@@ -10,6 +11,7 @@ export default function Home() {
       </div>
       <div className="h-full relative flex flex-col  col-span-3 justify-between bg-white">
         <MTH/>
+        <ScaraDisplay/>
         <Joystick/>
       </div>
       <div className="flex flex-col justify-start col-span-5 items-center">

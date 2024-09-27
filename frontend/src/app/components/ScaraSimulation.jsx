@@ -144,7 +144,7 @@ const Bottle = (attrs) => {
   }
   let bottle = <Model mat_index={0} key={generateRandomString(10)} url="./models/bottle.glb" position={[0,0,0]} scale={[SCALE*0.5,SCALE*0.5,SCALE*0.5]} name={"bottle"} rotation={[0, 0, 0]}/>
   return (<group
-  position={[attrs.x,attrs.z,attrs.y]}>
+  position={[attrs.x*SCALE,attrs.z*SCALE,-attrs.y*SCALE]}>
     {bottle}
   </group>)
 }

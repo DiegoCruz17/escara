@@ -45,11 +45,20 @@ const ScaraRobotControl = () => {
     try {
       const response = await fetch("http://127.0.0.1:8000/", requestOptions);
       let res = await response.json();
-      attrs.setMatrix(res.matrix);
-      attrs.setMatrix1(res.matrix1);
-      attrs.setMatrix2(res.matrix2);
-      attrs.setMatrix3(res.matrix3);
-      attrs.setMatrix4(res.matrix4);
+      console.log(res)
+      if(res.setting_matrix){
+        attrs.setMatrix(res.matrix);
+        attrs.setMatrix1(res.matrix1);
+        attrs.setMatrix2(res.matrix2);
+        attrs.setMatrix3(res.matrix3);
+        attrs.setMatrix4(res.matrix4);
+      }
+      else{
+        attrs.setBase(res.q1a)
+        attrs.setSegmento1(res.q2a)
+      }
+      
+    
       
     } catch (error) {
       console.error(error);

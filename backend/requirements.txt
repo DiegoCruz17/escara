@@ -2,3 +2,6 @@ django
 django-cors-headers
 numpy
 pyserial
+websocket-client
+channels
+daphne

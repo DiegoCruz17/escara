@@ -38,7 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'corsheaders',
-    'hmi.apps.HmiConfig'
+    'hmi.apps.HmiConfig',
+    'channels'
 ]
 
 MIDDLEWARE = [
@@ -93,7 +94,14 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'scara.wsgi.application'
+# Add these Channels-specific settings
+ASGI_APPLICATION = "scara.asgi.application"
 
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer"
+    }
+}
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
