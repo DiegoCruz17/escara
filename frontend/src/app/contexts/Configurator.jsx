@@ -22,8 +22,8 @@ export function ConfiguratorProvider({ children }) {
     const [zMax, setZMax] = useState(230);
     const [segmento1Min, setSegmento1Min] = useState(-150);
     const [segmento1Max, setSegmento1Max] = useState(150);
-    const [segmento2Min, setSegmento2Min] = useState(-150);
-    const [segmento2Max, setSegmento2Max] = useState(150);
+    const [segmento2Min, setSegmento2Min] = useState(-160);
+    const [segmento2Max, setSegmento2Max] = useState(160);
     const [gripperMin, setGripperMin] = useState(0);
     const [gripperMax, setGripperMax] = useState(90);
     const [matrix, setMatrix] = useState([

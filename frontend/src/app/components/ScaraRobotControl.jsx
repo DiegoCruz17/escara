@@ -53,9 +53,10 @@ const ScaraRobotControl = () => {
         attrs.setMatrix3(res.matrix3);
         attrs.setMatrix4(res.matrix4); 
       }
-      if(res.q1a && res.q2a){
+      if(res.q1a && res.q2a && res.zAxis){
         attrs.setBase(res.q1a)
         attrs.setSegmento1(res.q2a)
+        attrs.setZAxis(res.zAxis)
       }
       
     

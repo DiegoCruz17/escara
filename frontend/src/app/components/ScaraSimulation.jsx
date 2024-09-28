@@ -108,6 +108,7 @@ const Plane = (props) => {
 
 const Robot = (attrs) => {
   const [dimsSegmento, setDimsSegmento] = useState({"width": 0,"height": 0,"depth": 0});
+  const [dimsSegmento2, setDimsSegmento2] = useState({"width": 0,"height": 0,"depth": 0});
   function generateRandomString(length) {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let result = '';
@@ -122,12 +123,15 @@ const Robot = (attrs) => {
   let base = <Model key={generateRandomString(10)} url="./models/base.glb" position={[0,0,0]} scale={[SCALE,SCALE,SCALE]} name={"base"} rotation={[0, 0, 0]}/>
   let eje = <Model key={generateRandomString(10)} url="./models/eje.glb" position={[0,0,0]} scale={[SCALE,SCALE,SCALE]} name={"base"} rotation={[0, attrs.base*Math.PI/180, 0]}/>
   let segmento1 = <Model key={generateRandomString(10)} url="./models/segmento1.glb" position={[0,attrs.zAxis/25,0]} scale={[SCALE,SCALE,SCALE]} name={"base"} rotation={[0, attrs.base*Math.PI/180, 0]} onLoadCallback={setDimsSegmento}/>
-  let segmento2 = <Model key={generateRandomString(10)} url="./models/segmento2.glb" position={[dimsSegmento.width/30*Math.cos(attrs.base*Math.PI/180),attrs.zAxis/25,-dimsSegmento.width/30*Math.sin(attrs.base*Math.PI/180)]} scale={[SCALE,SCALE,SCALE]} name={"base"} rotation={[0, attrs.base*Math.PI/180+attrs.segmento1*Math.PI/180, 0]}/>
+  let segmento2 = <Model key={generateRandomString(10)} url="./models/segmento2.glb" position={[dimsSegmento.width/30*Math.cos(attrs.base*Math.PI/180),attrs.zAxis/25,-dimsSegmento.width/30*Math.sin(attrs.base*Math.PI/180)]} scale={[SCALE,SCALE,SCALE]} name={"base"} rotation={[0, attrs.base*Math.PI/180+attrs.segmento1*Math.PI/180,0]} onLoadCallback={setDimsSegmento2}/>
+  let gripper = <Model key={generateRandomString(10)} url="./models/Gripper.glb" position={[dimsSegmento.width/30*Math.cos(attrs.base*Math.PI/180)+dimsSegmento2.width/30*Math.cos(attrs.segmento1*Math.PI/180+attrs.base*Math.PI/180),attrs.zAxis/25+3,-dimsSegmento.width/30*Math.sin(attrs.base*Math.PI/180)-dimsSegmento2.width/30*Math.sin(attrs.segmento1*Math.PI/180+attrs.base*Math.PI/180)]} scale={[SCALE/1.5, SCALE/1.5, SCALE/1.5]} name={"Gripper"} rotation={[0, attrs.segmento2*Math.PI/180-0.5*Math.PI, 0]} />;
+
   return (<group position={[0,0,0]}>
     {base}
     {eje}
     {segmento1}
     {segmento2}
+    {gripper}
   </group>)
 }
 const Bottle = (attrs) => {
