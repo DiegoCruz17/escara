@@ -47,6 +47,8 @@ class Controlador:
                 "data": data
             }
         )
+    def calcular_Z(self,z_obj):
+        return z_obj+24.3-12.7
     def procesar_cinematica_inversa_geom(self,x, y, L3=228, L5=164):
         c2 = (x**2+y**2-L3**2-L5**2)/(2*L3*L5)
         s2a =  np.sqrt(1-c2**2)

@@ -36,13 +36,15 @@ def index(request):
                 case "geometrico":
                     q1a,q2a = controlador.procesar_cinematica_inversa_geom(data.get("x"),data.get("y"))
                     mth,mth0_1,mth1_2,mth2_3,mth3_4 = controlador.procesar_cinematica_directa(q1a,data.get("zAxis"),q2a,data.get("segmento2"))
-                    res = {"q1a":q1a,"q2a":q2a,"setting_matrix":True,"matrix":mth.tolist(),'matrix1':mth0_1.tolist(),'matrix2':mth1_2.tolist(),'matrix3':mth2_3.tolist(),'matrix4':mth3_4.tolist()}
+                    zAxis = controlador.calcular_Z(data.get("z"))
+                    res = {"q1a":q1a,"q2a":q2a,"zAxis":zAxis,"setting_matrix":True,"matrix":mth.tolist(),'matrix1':mth0_1.tolist(),'matrix2':mth1_2.tolist(),'matrix3':mth2_3.tolist(),'matrix4':mth3_4.tolist()}
                     print(res)
                     return JsonResponse(res,status=200)
                 case "algebraico":
                     q1a,q2a = controlador.procesar_cinematica_inversa_alg(data.get("x"),data.get("y"))
                     mth,mth0_1,mth1_2,mth2_3,mth3_4 = controlador.procesar_cinematica_directa(q1a,data.get("zAxis"),q2a,data.get("segmento2")) 
-                    res = {"q1a":q1a,"q2a":q2a,"setting_matrix":True,"matrix":mth.tolist(),'matrix1':mth0_1.tolist(),'matrix2':mth1_2.tolist(),'matrix3':mth2_3.tolist(),'matrix4':mth3_4.tolist()}
+                    zAxis = controlador.calcular_Z(data.get("z"))
+                    res = {"q1a":q1a,"q2a":q2a,"zAxis":zAxis,"setting_matrix":True,"matrix":mth.tolist(),'matrix1':mth0_1.tolist(),'matrix2':mth1_2.tolist(),'matrix3':mth2_3.tolist(),'matrix4':mth3_4.tolist()}
                     print(res)
                     return JsonResponse(res,status=200)
                 case "mth":

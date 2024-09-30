@@ -23,5 +23,5 @@ npm run dev
 3. Desplegar el servidor:
 ```
 cd backend
-python manage.py runserver
+daphne scara.asgi:application
 ```
