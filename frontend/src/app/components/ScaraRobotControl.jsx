@@ -83,14 +83,6 @@ const ScaraRobotControl = () => {
         <div className="flex flex-col flex-grow h-full ">
           <div className="min-w-[100%] flex-grow max-w-[800px] bg-background p-[16px]">
           <TabsContent value="forward">
-            {/* <div className='flex flex-row justify-center gap-2'>
-              <input 
-              type="checkbox" 
-              checked={attrs.synch}
-              onChange={() => attrs.setSynch(!attrs.synch)}
-            />
-            <span>Habilitar Sincronizacion</span>
-            </div> */}
             <div className='flex flex-row justify-end gap-2'>
               <input 
               type="checkbox" 
@@ -168,14 +160,6 @@ const ScaraRobotControl = () => {
               </div>
           </TabsContent>
           <TabsContent value="inverse">
-            {/* <div className='flex flex-row justify-center gap-2 mb-2'>
-                <input 
-                type="checkbox" 
-                checked={attrs.synch}
-                onChange={() => attrs.setSynch(!attrs.synch)}
-              />
-              <span>Habilitar Sincronizacion</span>
-              </div> */}
             <RadioGroup defaultValue={attrs.mode} 
             onValueChange={(value) => {
               attrs.setMode(value);
