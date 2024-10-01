@@ -5,10 +5,12 @@ import { useConfigurator } from '../contexts/Configurator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/app/components/ui/tabs"
 import { Label } from "@/app/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/app/components/ui/radio-group"
-
+import { useIncrementalUpdate } from '../lib/utils';
 const ScaraRobotControl = () => {
   const attrs = useConfigurator();
   const [limitsEnabled, setLimitsEnabled] = useState(false);
+  const incrementalUpdate = useIncrementalUpdate();
+
 
   const resetToDefaults = () => {
     attrs.setBase(0);
@@ -54,9 +56,12 @@ const ScaraRobotControl = () => {
         attrs.setMatrix4(res.matrix4); 
       }
       if(res.q1a && res.q2a && res.zAxis){
-        attrs.setBase(res.q1a)
-        attrs.setSegmento1(res.q2a)
-        attrs.setZAxis(res.zAxis)
+        // attrs.setBase(res.q1a)
+        // attrs.setSegmento1(res.q2a)
+        // attrs.setZAxis(res.zAxis)
+        incrementalUpdate(attrs.base, res.q1a, attrs.setBase, 2000);
+        incrementalUpdate(attrs.segmento1, res.q2a, attrs.setSegmento1, 2000);
+        incrementalUpdate(attrs.zAxis, res.zAxis, attrs.setZAxis, 2000);
       }
       
     

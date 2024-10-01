@@ -49,7 +49,6 @@ const Joystick = () => {
   const updateDirection = useCallback((x, y) => {
     const angle = Math.atan2(y, x) * (180 / Math.PI);
     let direction;
-    console.log(angle)
     if (Math.abs(x) < 0.1 && Math.abs(y) < 0.1) {
       direction = 'Origen';
     } else if (angle < 0 && angle >= -45) {
@@ -63,7 +62,7 @@ const Joystick = () => {
       handleVarChange(attrs.z, attrs.setZ, 5)
     } else if (angle < -135 && angle >= -180) {
       direction = '+O';
-      handleVarChange(attrs.gripper, attrs.setGripper, 5)
+      handleVarChange(attrs.segmento2, attrs.setSegmento2, 5)
     } else if (angle < 180 && angle >= 135) {
       direction = '-X';
       handleVarChange(attrs.x, attrs.setX, -5)
@@ -75,7 +74,7 @@ const Joystick = () => {
       handleVarChange(attrs.z, attrs.setZ, -5)
     } else if (angle < 45 && angle >= 0) {
       direction = '-O';
-      handleVarChange(attrs.gripper, attrs.setGripper, -5)
+      handleVarChange(attrs.segmento2, attrs.setSegmento2, -5)
     }
     setDirection(direction);
   }, [attrs]);

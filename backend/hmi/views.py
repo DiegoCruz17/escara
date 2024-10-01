@@ -48,7 +48,8 @@ def index(request):
                     print(res)
                     return JsonResponse(res,status=200)
                 case "mth":
-                    pass
+                    controlador.send_scara_update(data)
+                    return JsonResponse({"data":"hey"},status=200)
                 case "newton":
                     pass
                 case "gradiente":

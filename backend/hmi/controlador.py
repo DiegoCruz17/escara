@@ -3,6 +3,7 @@ import serial
 import math
 import websocket
 import json
+import threading
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 
@@ -33,20 +34,15 @@ class Controlador:
     def __init__(self) -> None:
         #Inicio
         print("Inicializando Controlador...")
+        self.channel_layer = get_channel_layer()
         #Reviso conexión con serial
         self.serial = self.inicializar_serial()
+        self.is_listening = False
+        self.listener_thread = None
         self.modos = ["geometrico","algebraico","mth","newton","gradiente"]
         self.inicializar_control_inalambrico()
-        self.channel_layer = get_channel_layer()
 
-    def send_scara_update(self, data):
-        async_to_sync(self.channel_layer.group_send)(
-            "scara_updates",
-            {
-                "type": "scara_update",
-                "data": data
-            }
-        )
+    
     def calcular_Z(self,z_obj):
         return z_obj+24.3-12.7
     def procesar_cinematica_inversa_geom(self,x, y, L3=228, L5=164):
@@ -139,15 +135,49 @@ class Controlador:
         # Iniciar la conexión
         ws.run_forever()
 
-    def inicializar_serial(self,port="COM7"):
-        print("Inicializando conexión serial")
+    def inicializar_serial(self, port="COM7"):
         try:
-            ser = serial.Serial(
-            port='COM7',
-            baudrate=9600
-            )
+            ser = serial.Serial(port='COM7', baudrate=9600)
             print(f"Conexión establecida en el puerto {port}")
             return ser
         except:
             print("No se ha podido establecer una conexión serial")
             return None
+
+    def start_serial_listener(self):
+        if self.serial and not self.is_listening:
+            self.is_listening = True
+            self.listener_thread = threading.Thread(target=self._serial_listener)
+            self.listener_thread.daemon = True
+            self.listener_thread.start()
+
+    def _serial_listener(self):
+        while self.is_listening:
+            if self.serial.in_waiting:
+                try:
+                    data = self.serial.readline().decode('utf-8').strip()
+                    self.handle_serial_data(data)
+                except Exception as e:
+                    print(f"Error reading serial data: {str(e)}")
+
+    def handle_serial_data(self, data):
+        try:
+            # Assuming the data is JSON-formatted
+            parsed_data = json.loads(data)
+            self.send_scara_update(parsed_data)
+        except json.JSONDecodeError:
+            print(f"Received non-JSON data: {data}")
+
+    def send_scara_update(self, data):
+        async_to_sync(self.channel_layer.group_send)(
+            "scara_updates",
+            {
+                "type": "scara_update",
+                "data": data
+            }
+        )
+
+    def stop_serial_listener(self):
+        self.is_listening = False
+        if self.listener_thread:
+            self.listener_thread.join()

@@ -1,11 +1,15 @@
 "use client"
 import React from 'react';
 import { useState, useEffect, useCallback } from 'react';
-
+import { useConfigurator } from '../contexts/Configurator';
+import { useIncrementalUpdate } from '../lib/utils';
 function useScaraWebSocket(url){
     const [scaraData, setScaraData] = useState(null);
     const [isConnected, setIsConnected] = useState(false);
     const [error, setError] = useState(null);
+    const attrs = useConfigurator()
+    const incrementalUpdate = useIncrementalUpdate();
+
   
     const connect = useCallback(() => {
       const ws = new WebSocket(url);
@@ -15,14 +19,16 @@ function useScaraWebSocket(url){
         setIsConnected(true);
         setError(null);
       };
-  
       ws.onmessage = (event) => {
-        console.log("WS Event", event)
-        try {
-          const data = JSON.parse(event.data);
-          setScaraData(data);
-        } catch (err) {
-          console.error('Error parsing WebSocket message:', err);
+        const res = JSON.parse(event.data);
+        console.log('Received SCARA data:', res);
+        if(res.q1a && res.q2a && res.zAxis){
+          // attrs.setBase(res.q1a)
+          // attrs.setSegmento1(res.q2a)
+          // attrs.setZAxis(res.zAxis)
+          incrementalUpdate(attrs.base, res.q1a, attrs.setBase, 2000);
+          incrementalUpdate(attrs.segmento1, res.q2a, attrs.setSegmento1, 2000);
+          incrementalUpdate(attrs.zAxis, res.zAxis, attrs.setZAxis, 2000);
         }
       };
   
@@ -57,46 +63,9 @@ function useScaraWebSocket(url){
 const ScaraDisplay = () => {
   const { scaraData, isConnected, error } = useScaraWebSocket('ws://127.0.0.1:8000/ws/scara/');
 
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
+  return (<div className='flex flex-row justify-center font-bold my-2'><span className={isConnected?"text-[#50FF50]":"text-red"}>{isConnected ? 'Conexión disponible':'Error al conectar'}</span></div>)
 
-  if (!isConnected) {
-    return <div>Connecting to SCARA...</div>;
-  }
 
-  if (!scaraData) {
-    return <div>Waiting for SCARA data...</div>;
-  }
-
-  return (
-    <div className="scara-display">
-      <h2>SCARA Data</h2>
-      <div>
-        <h3>Main Matrix</h3>
-        <pre>{JSON.stringify(scaraData.matrix, null, 2)}</pre>
-      </div>
-      <div>
-        <h3>Joint Matrices</h3>
-        <div>
-          <h4>Matrix 1</h4>
-          <pre>{JSON.stringify(scaraData.matrix1, null, 2)}</pre>
-        </div>
-        <div>
-          <h4>Matrix 2</h4>
-          <pre>{JSON.stringify(scaraData.matrix2, null, 2)}</pre>
-        </div>
-        <div>
-          <h4>Matrix 3</h4>
-          <pre>{JSON.stringify(scaraData.matrix3, null, 2)}</pre>
-        </div>
-        <div>
-          <h4>Matrix 4</h4>
-          <pre>{JSON.stringify(scaraData.matrix4, null, 2)}</pre>
-        </div>
-      </div>
-    </div>
-  );
 };
 
 export default ScaraDisplay;
