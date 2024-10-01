@@ -83,6 +83,14 @@ const ScaraRobotControl = () => {
         <div className="flex flex-col flex-grow h-full ">
           <div className="min-w-[100%] flex-grow max-w-[800px] bg-background p-[16px]">
           <TabsContent value="forward">
+            {/* <div className='flex flex-row justify-center gap-2'>
+              <input 
+              type="checkbox" 
+              checked={attrs.synch}
+              onChange={() => attrs.setSynch(!attrs.synch)}
+            />
+            <span>Habilitar Sincronizacion</span>
+            </div> */}
             <div className='flex flex-row justify-end gap-2'>
               <input 
               type="checkbox" 
@@ -160,6 +168,14 @@ const ScaraRobotControl = () => {
               </div>
           </TabsContent>
           <TabsContent value="inverse">
+            {/* <div className='flex flex-row justify-center gap-2 mb-2'>
+                <input 
+                type="checkbox" 
+                checked={attrs.synch}
+                onChange={() => attrs.setSynch(!attrs.synch)}
+              />
+              <span>Habilitar Sincronizacion</span>
+              </div> */}
             <RadioGroup defaultValue={attrs.mode} 
             onValueChange={(value) => {
               attrs.setMode(value);
@@ -188,7 +204,9 @@ const ScaraRobotControl = () => {
             </RadioGroup>
             <PositionControlGroup title={"X"} value={attrs.x} setValue={attrs.setX} min={-500} max={500} unit={"mm"}/>
             <PositionControlGroup title={"Y"} value={attrs.y} setValue={attrs.setY} min={-500} max={500} unit={"mm"}/>
-            <PositionControlGroup title={"Z"} value={attrs.z} setValue={attrs.setZ} min={0} max={100} unit={"mm"}/>
+            <PositionControlGroup title={"Z"} value={attrs.z} setValue={attrs.setZ} min={0} max={200} unit={"mm"}/>
+            <PositionControlGroup title={"O"} value={attrs.segmento2} setValue={attrs.setSegmento2} min={-150} max={150} unit={"°"}/>
+            <PositionControlGroup title={"G"} value={attrs.gripper} setValue={attrs.setGripper} min={0} max={90} unit={"°"}/>
               <div className="mt-8 flex justify-center space-x-4">
                 <button onClick={sendInstructions} className="bg-[#5e7029] text-white font-normal py-2 px-4 rounded-[4px]">
                   Execute

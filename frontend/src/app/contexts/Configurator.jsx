@@ -8,6 +8,7 @@ const ConfiguratorContext = createContext();
 // Create a provider component
 export function ConfiguratorProvider({ children }) {
     const [mode, setMode] = useState("directo");
+    const [synch, setSynch] = useState(true);
     const [x, setX] = useState(18);
     const [y, setY] = useState(0);
     const [z, setZ] = useState(0);
@@ -58,6 +59,8 @@ export function ConfiguratorProvider({ children }) {
       ]);
 
     const attrs = {
+        "synch":synch,
+        "setSynch":setSynch,
         "x":x, 
         "setX":setX, 
         "y":y,

@@ -31,20 +31,60 @@ def on_open(ws):
     print("Conexión establecida con el servidor WebSocket")
 
 class Controlador:
-    def __init__(self) -> None:
-        #Inicio
-        print("Inicializando Controlador...")
+    _instance = None
+
+    def __new__(cls):
+        if cls._instance is None:
+            print("Creating Controlador instance")
+            cls._instance = super(Controlador, cls).__new__(cls)
+            cls._instance._initialized = False
+        return cls._instance
+
+    def __init__(self):
+        if self._initialized:
+            return
+        self._initialized = True
+        print("Initializing Controlador...")
+        # Your existing initialization code here
         self.channel_layer = get_channel_layer()
-        #Reviso conexión con serial
         self.serial = self.inicializar_serial()
         self.is_listening = False
         self.listener_thread = None
         self.modos = ["geometrico","algebraico","mth","newton","gradiente"]
+        self.serial_lock = threading.Lock()
+        self.wireless_thread = None
         self.inicializar_control_inalambrico()
+
+    def inicializar_control_inalinicializar_control_inalambricoambrico(self):
+        websocket_url = "ws://192.168.43.72:81/"
+
+        # Crear el WebSocket y asignar los callbacks
+        ws = websocket.WebSocketApp(websocket_url,
+                                    on_message=on_message,
+                                    on_error=on_error,
+                                    on_close=on_close)
+
+        # Asignar la función que se ejecutará cuando se establezca la conexión
+        ws.on_open = on_open
+
+        # Iniciar la conexión
+        ws.run_forever()
 
     
     def calcular_Z(self,z_obj):
         return z_obj+24.3-12.7
+    
+    def procesar_cinematica_inversa_mth(self,x, y, L3=228, L5=164):
+        c2 = (x**2+y**2-L3**2-L5**2)/(2*L3*L5)
+        s2 =  np.sqrt(1-c2**2)
+        q2 = (np.arctan2(s2, c2))*180/np.pi
+
+        c1 = (L5*c2*x+L3*x+L5*s2*y)/(x**2+y**2)
+        s1 =  np.sqrt(1-c1**2)
+        q1 = (np.arctan2(s1, c1))*180/np.pi
+
+        return q1,q2
+
     def procesar_cinematica_inversa_geom(self,x, y, L3=228, L5=164):
         c2 = (x**2+y**2-L3**2-L5**2)/(2*L3*L5)
         s2a =  np.sqrt(1-c2**2)
@@ -135,13 +175,13 @@ class Controlador:
         # Iniciar la conexión
         ws.run_forever()
 
-    def inicializar_serial(self, port="COM7"):
+    def inicializar_serial(self, port="COM8"):
         try:
-            ser = serial.Serial(port='COM7', baudrate=9600)
+            ser = serial.Serial(port, baudrate=9600)
             print(f"Conexión establecida en el puerto {port}")
             return ser
-        except:
-            print("No se ha podido establecer una conexión serial")
+        except Exception as e:
+            print("No se ha podido establecer una conexión serial: " + str(e))
             return None
 
     def start_serial_listener(self):
@@ -153,21 +193,40 @@ class Controlador:
 
     def _serial_listener(self):
         while self.is_listening:
-            if self.serial.in_waiting:
-                try:
-                    data = self.serial.readline().decode('utf-8').strip()
-                    self.handle_serial_data(data)
-                except Exception as e:
-                    print(f"Error reading serial data: {str(e)}")
+            with self.serial_lock:
+                if self.serial.in_waiting:
+                    try:
+                        data = self.serial.readline().decode('utf-8').strip()
+                        self.handle_serial_data(data)
+                    except Exception as e:
+                        print(f"Error reading serial data: {str(e)}")
 
     def handle_serial_data(self, data):
         try:
-            # Assuming the data is JSON-formatted
             parsed_data = json.loads(data)
-            self.send_scara_update(parsed_data)
+            zAxis = parsed_data.get('MotorZ')
+            segmento2 = parsed_data.get('MotorA')
+            base = parsed_data.get('MotorY')
+            segmento1 = parsed_data.get('MotorX')
+            gripper = parsed_data.get('Servo')
+            data = {"zAxis":zAxis,"segmento2":segmento2,"base":base,"gripper":gripper,"segmento1":segmento1}
+            self.send_scara_update(data)
         except json.JSONDecodeError:
             print(f"Received non-JSON data: {data}")
 
+    def send_serial_data(self, base, segmento1, segmento2, zAxis, gripper):
+        if self.serial:
+            with self.serial_lock:
+                try:
+                    data = json.dumps({"base":base, "segmento1":segmento1, "segmento2":segmento2, "zAxis":zAxis, "gripper":gripper})
+                    print(data)
+                    self.serial.write(data.encode('utf-8'))
+                    self.serial.write(b'\n')  # Add newline for proper reading on Arduino side
+                    # self.serial.flush()  # Ensure all data is written
+                except Exception as e:
+                    print("Error sending data:", str(e))
+        else:
+            print("No serial conn available")
     def send_scara_update(self, data):
         async_to_sync(self.channel_layer.group_send)(
             "scara_updates",
@@ -181,3 +240,6 @@ class Controlador:
         self.is_listening = False
         if self.listener_thread:
             self.listener_thread.join()
+
+
+global_controlador = Controlador()
