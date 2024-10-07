@@ -50,7 +50,7 @@ class Controlador:
         self.serial = self.inicializar_serial()
         self.is_listening = False
         self.listener_thread = None
-        self.modos = ["geometrico","algebraico","mth","newton","gradiente"]
+        self.modos = ["geometrico","algebraico","mth","newton","gradiente","frontal","floor"]
         self.serial_lock = threading.Lock()
         self.wireless_thread = None
         self.inicializar_control_inalambrico()
@@ -73,6 +73,182 @@ class Controlador:
     
     def calcular_Z(self,z_obj):
         return z_obj+24.3-12.7
+    
+
+    def procesar_cinematica_inversa_gradiente(self,xd, q_inicial, d2): #[x,y,z] [base,segmento1,segmento2] zAxis
+        # Parámetros del robot
+        l1 = 104
+        l3 = 228
+        l4 = 24
+        l5 = 164
+        l6 = 100
+        delta = 0.001
+        alpha = 0.1
+        epsilon = 0.01
+        max_iter = 10000
+
+        # Función para calcular la posición del efector final (cinemática directa)
+        def fkine(q):
+            x1 = l3 * np.cos(q[0]) + l5 * np.cos(q[0] + q[1])
+            y1 = l3 * np.sin(q[0]) + l5 * np.sin(q[0] + q[1])
+            z1 = d2 + l1 - l4 - l6
+            yaw1 = np.rad2deg(q[0] + q[1] + q[2])
+            return np.array([x1, y1, z1, yaw1])
+
+        # Inicializar los ángulos con los valores proporcionados
+        q = q_inicial
+
+        # Parte 1: Ajuste de los ángulos q0, q1, q2, q3
+        for i in range(max_iter):
+            # Posición actual del efector final
+            f = fkine(q)
+            e = xd - f[:3]  # Error entre la posición deseada y la actual (solo XYZ)
+
+            # Calcular el Jacobiano numéricamente
+            JT = 1/delta * np.array([
+                fkine([q[0] + delta, q[1], q[2], q[3]])[:3] - fkine(q)[:3],
+                fkine([q[0], q[1] + delta, q[2], q[3]])[:3] - fkine(q)[:3],
+                fkine([q[0], q[1], q[2] + delta, q[3]])[:3] - fkine(q)[:3],
+                fkine([q[0], q[1], q[2], q[3] + delta])[:3] - fkine(q)[:3]
+            ])
+
+            J = JT.transpose()
+
+            # Usar la pseudoinversa de Moore-Penrose
+            q = q + alpha * np.dot(np.linalg.pinv(J), e)
+
+            # Restricciones en los rangos articulares
+            if q[0] < np.deg2rad(-180):
+                q[0] = np.deg2rad(180)
+            elif q[0] > np.deg2rad(180):
+                q[0] = np.deg2rad(-180)
+
+            if q[1] < np.deg2rad(-110):
+                q[1] = np.deg2rad(110)
+            elif q[1] > np.deg2rad(110):
+                q[1] = np.deg2rad(-110)
+
+            if q[2] < np.deg2rad(-110):
+                q[2] = np.deg2rad(110)
+            elif q[2] > np.deg2rad(110):
+                q[2] = np.deg2rad(-110)
+
+            if q[3] < np.deg2rad(-180):
+                q[3] = np.deg2rad(180)
+            elif q[3] > np.deg2rad(180):
+                q[3] = np.deg2rad(-180)
+
+            # Condición de terminación
+            if np.linalg.norm(e) < epsilon:
+                break
+
+        # Parte 2: Ajuste de d2 (componente z)
+        maxx_iter = 10000  # Límite de iteraciones para d2
+        delta_d2 = 0.5  # Incremento o decremento para ajustar d2
+
+        for _ in range(maxx_iter):
+            z_actual = d2 + l1 - l4 - l6  # Componente z actual del efector
+            error_z = xd[2] - z_actual  # Diferencia con la posición deseada
+
+            if abs(error_z) < epsilon:  # Si el error es suficientemente pequeño
+                break
+
+            # Ajustar d2 hacia la posición deseada
+            if z_actual < xd[2]:
+                d2 += delta_d2
+            else:
+                d2 -= delta_d2
+
+        print(q)
+        print(d2)
+
+        q = np.rad2deg(q)
+
+        return q[0],q[1],q[3], d2
+    
+    def procesar_cinematica_inversa_newton(self,xd,q_inicial, d2):#xd = [x,y,z]
+        # Parámetros del robot
+        l1 = 104
+        l3 = 228
+        l4 = 24
+        l5 = 164
+        l6 = 100
+        delta = 0.001
+        epsilon = 1e-3
+        max_iter = 1000
+
+        # Función para calcular la posición del efector final (cinemática directa)
+        def fkine(q):
+            x1 = l3 * np.cos(q[0]) + l5 * np.cos(q[0] + q[1])
+            y1 = l3 * np.sin(q[0]) + l5 * np.sin(q[0] + q[1])
+            z1 = d2 + l1 - l4 - l6
+            yaw1 = np.rad2deg(q[0] + q[1] + q[2])
+            return np.array([x1, y1, z1, yaw1])
+
+        # Inicializar los ángulos con los valores proporcionados
+        q = q_inicial
+
+        # Parte 1: Ajuste de los ángulos q0, q1, q2, q3
+        for i in range(max_iter):
+            # Posición actual del efector final
+            f = fkine(q)
+            e = xd - f[:3]  # Error entre la posición deseada y la actual (solo XYZ)
+
+            # Calcular el Jacobiano numéricamente
+            JT = 1/delta * np.array([
+                fkine([q[0] + delta, q[1], q[2], q[3]])[:3] - fkine(q)[:3],
+                fkine([q[0], q[1] + delta, q[2], q[3]])[:3] - fkine(q)[:3],
+                fkine([q[0], q[1], q[2] + delta, q[3]])[:3] - fkine(q)[:3],
+                fkine([q[0], q[1], q[2], q[3] + delta])[:3] - fkine(q)[:3]
+            ])
+
+            J = JT.transpose()
+
+            # Usar la pseudoinversa de Moore-Penrose
+            q = q + np.dot(np.linalg.pinv(J), e)
+
+            # Restricciones en los rangos articulares
+            if q[0] < np.deg2rad(-180):
+                q[0] = np.deg2rad(180)
+            elif q[0] > np.deg2rad(180):
+                q[0] = np.deg2rad(-180)
+
+            if q[1] < np.deg2rad(-110):
+                q[1] = np.deg2rad(110)
+            elif q[1] > np.deg2rad(110):
+                q[1] = np.deg2rad(-110)
+
+            if q[2] < np.deg2rad(-110):
+                q[2] = np.deg2rad(110)
+            elif q[2] > np.deg2rad(110):
+                q[2] = np.deg2rad(-110)
+
+            if q[3] < np.deg2rad(-180):
+                q[3] = np.deg2rad(180)
+            elif q[3] > np.deg2rad(180):
+                q[3] = np.deg2rad(-180)
+            # Condición de terminación
+            if np.linalg.norm(e) < epsilon:
+                break
+
+        # Parte 2: Ajuste de d2 (componente z)
+        maxx_iter = 10000  # Límite de iteraciones para d2
+        delta_d2 = 0.5  # Incremento o decremento para ajustar d2
+
+        for _ in range(maxx_iter):
+            z_actual = d2 + l1 - l4 - l6  # Componente z actual del efector
+            error_z = xd[2] - z_actual  # Diferencia con la posición deseada
+
+            if abs(error_z) < epsilon:  # Si el error es suficientemente pequeño
+                break
+
+            # Ajustar d2 hacia la posición deseada
+            if z_actual < xd[2]:
+                d2 += delta_d2
+            else:
+                d2 -= delta_d2
+        q = np.rad2deg(q)
+        return q[0],q[1],q[3], d2
     
     def procesar_cinematica_inversa_mth(self,x, y, L3=228, L5=164):
         c2 = (x**2+y**2-L3**2-L5**2)/(2*L3*L5)
@@ -116,6 +292,7 @@ class Controlador:
         v = np.dot( np.linalg.inv(A), np.array([x,y]) )
         c1 = v[0]; s1 = v[1]
         q1b = (np.arctan2(s1, c1))*180/np.pi
+        print(f"Q1: {q1a} Q2:{q2a}")
         return q1a,q2a
 
     def procesar_cinematica_directa(self,base,z,segmento1,segmento2):

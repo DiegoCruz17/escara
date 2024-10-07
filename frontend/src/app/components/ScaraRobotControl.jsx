@@ -79,6 +79,7 @@ const ScaraRobotControl = () => {
         <TabsList className="flex flex-row p-0 justify-start m-0">
           <TabsTrigger onClick={()=>{attrs.setMode("directo")}} value="forward" className="font-bold">Forward</TabsTrigger>
           <TabsTrigger onClick={()=>{attrs.setMode("geometrico")}} value="inverse" className="font-bold">Inverse</TabsTrigger>
+          <TabsTrigger onClick={()=>{attrs.setMode("frontal")}} value="coreo" className="font-bold">Coreo</TabsTrigger>
         </TabsList>
         <div className="flex flex-col flex-grow h-full ">
           <div className="min-w-[100%] flex-grow max-w-[800px] bg-background p-[16px]">
@@ -158,6 +159,7 @@ const ScaraRobotControl = () => {
                   Reset
                 </button>
               </div>
+              
           </TabsContent>
           <TabsContent value="inverse">
             <RadioGroup defaultValue={attrs.mode} 
@@ -199,6 +201,34 @@ const ScaraRobotControl = () => {
                   Reset
                 </button>
               </div>
+              
+
+          </TabsContent>
+          <TabsContent value="coreo">
+            <RadioGroup defaultValue={attrs.mode} 
+            onValueChange={(value) => {
+              attrs.setMode(value);
+            }} 
+            className="flex flex-row gap-2 justify-center">
+              <div className="flex items-center space-x-2 justify-center">
+                <RadioGroupItem value="frontal" id="frontal" />
+                <Label htmlFor="frontal">Frente</Label>
+              </div>
+              <div className="flex items-center space-x-2 justify-center">
+                <RadioGroupItem value="floor" id="floor" />
+                <Label htmlFor="floor">Suelo</Label>
+              </div>
+            </RadioGroup>
+              <div className="mt-8 flex justify-center space-x-4">
+                <button onClick={sendInstructions} className="bg-[#5e7029] text-white font-normal py-2 px-4 rounded-[4px]">
+                  Execute
+                </button>
+                <button onClick={resetToDefaults} className="bg-[#5e2129] text-white font-normal py-2 px-4 rounded-[4px]">
+                  Reset
+                </button>
+              </div>
+              
+
           </TabsContent>
           </div>
         </div>

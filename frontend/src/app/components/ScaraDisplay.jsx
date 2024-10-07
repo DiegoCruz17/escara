@@ -15,7 +15,7 @@ function useScaraWebSocket(url) {
         console.log('Synch', attrs.synch);
         console.log('Received SCARA data:', res);
 
-        if (attrs.synch) {
+        if (attrs.synch && !res.coreo) {
             attrs.setBase(res.base);
             attrs.setSegmento1(res.segmento1);
             attrs.setZAxis(res.zAxis);
@@ -24,15 +24,16 @@ function useScaraWebSocket(url) {
         } else {
             console.log("No hay sincronizacion");
         }
-
+        
         // Uncomment if you want to use incremental update
-        // if (attrs.synch) {
-        //     incrementalUpdate(attrs.base, res.base, attrs.setBase, 500);
-        //     incrementalUpdate(attrs.segmento1, res.segmento1, attrs.setSegmento1, 500);
-        //     incrementalUpdate(attrs.zAxis, res.zAxis, attrs.setZAxis, 500);
-        //     incrementalUpdate(attrs.gripper, res.gripper, attrs.setGripper, 500);
-        //     incrementalUpdate(attrs.segmento2, res.segmento2, attrs.setSegmento2, 500);
-        // }
+        if (res.coreo) {
+            // attrs.setBase(res.q1a);
+            // attrs.setSegmento1(res.q2a);
+            // attrs.setZAxis(res.zAxis);
+            incrementalUpdate(attrs.base, res.q1a, attrs.setBase, 500);
+            incrementalUpdate(attrs.segmento1, res.q2a, attrs.setSegmento1, 500);
+            incrementalUpdate(attrs.zAxis, res.zAxis, attrs.setZAxis, 500);
+        }
     }, [attrs, incrementalUpdate]);
 
     useEffect(() => {
